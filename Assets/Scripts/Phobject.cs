@@ -19,7 +19,7 @@ public class Phobject : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+            
     }
 
     public Phobject SetScale(Vector3 scale)
