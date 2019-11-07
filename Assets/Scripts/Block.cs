@@ -5,6 +5,7 @@ using UnityEngine;
 public class Block : MonoBehaviour
 {
     public byte[,,] voxels;
+    public byte[,,] lodVoxels;
 
     public int xLength, yLength, zLength;
     public Block left, right, bottom, top, back, front;
@@ -57,6 +58,59 @@ public class Block : MonoBehaviour
                 for (int z = 0; z < voxels.GetLength(2) && z + zBlock * zLength < zVol; z++)
                 {
                     voxels[x, y, z] = (byte)Random.Range(1, 256);
+                }
+            }
+        }
+
+        return this;
+    }
+
+    public Block SetLod(byte lod)
+    {
+        lodMesh = lod;
+
+        if (lod == 0)
+        {
+            return this;
+        }
+
+        lodVoxels = new byte[xLength / lodMesh, yLength / lodMesh, zLength / lodMesh];
+
+        for (int x = 0; x < lodVoxels.GetLength(0); x++)
+        {
+            for (int y = 0; y < lodVoxels.GetLength(1); y++)
+            {
+                for (int z = 0; z < lodVoxels.GetLength(2); z++)
+                {
+                    float avgVal = 0f;
+                    int tot = 0;
+                    for (int lodX = 0; lodX < 1 + lodMesh; lodX++)
+                    {
+                        for (int lodY = 0; lodY < 1 + lodMesh; lodY++)
+                        {
+                            for (int lodZ = 0; lodZ < 1 + lodMesh; lodZ++)
+                            {
+                                byte val = voxels[x + lodX, y + lodY, z + lodZ];
+                                if (val > 0)
+                                {
+                                    avgVal += val;
+                                    tot++;
+                                }
+                                
+                            }
+                        }
+                    }
+
+                    if (tot >= lodMesh * .5f)
+                    {
+                        avgVal /= tot;
+                        lodVoxels[x, y, z] = (byte)avgVal;
+                    }
+                    else
+                    {
+                        lodVoxels[x, y, z] = 0;
+                    }
+                    
                 }
             }
         }

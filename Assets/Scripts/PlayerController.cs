@@ -31,8 +31,11 @@ public class PlayerController : MonoBehaviour
         float zButton = Input.GetAxisRaw("Vertical");
         float xButton = Input.GetAxisRaw("Horizontal");
 
+        //GetComponent<CharacterController>().Move(
+        //  Quaternion.Euler(0f, headRotation.y, 0f) * new Vector3(xButton, 0f, zButton) * moveSpeed);
+
         GetComponent<CharacterController>().Move(
-            Quaternion.Euler(0f, headRotation.y, 0f) * new Vector3(xButton, 0f, zButton) * moveSpeed);
+            headCam.transform.rotation * new Vector3(xButton, 0f, zButton) * moveSpeed);
 
         float xMouse = Input.GetAxisRaw("Mouse X");
         float yMouse = Input.GetAxisRaw("Mouse Y");

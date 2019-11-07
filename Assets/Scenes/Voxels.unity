@@ -443,13 +443,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2033325619}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 50, z: -500}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 100, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!143 &2033325621
 CharacterController:
   m_ObjectHideFlags: 0
@@ -554,27 +554,32 @@ PrefabInstance:
     - target: {fileID: 203685567397366993, guid: d31b94fc07f8340258addd6c68b59591,
         type: 3}
       propertyPath: xLength
-      value: 1000
+      value: 4096
       objectReference: {fileID: 0}
     - target: {fileID: 203685567397366993, guid: d31b94fc07f8340258addd6c68b59591,
         type: 3}
       propertyPath: yLength
-      value: 200
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 203685567397366993, guid: d31b94fc07f8340258addd6c68b59591,
         type: 3}
       propertyPath: zLength
-      value: 8
+      value: 4096
       objectReference: {fileID: 0}
     - target: {fileID: 203685567397366993, guid: d31b94fc07f8340258addd6c68b59591,
         type: 3}
       propertyPath: blockMeshRate
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 203685567397366993, guid: d31b94fc07f8340258addd6c68b59591,
         type: 3}
       propertyPath: maxBlockVolume
-      value: 8000
+      value: 4096
+      objectReference: {fileID: 0}
+    - target: {fileID: 203685567397366993, guid: d31b94fc07f8340258addd6c68b59591,
+        type: 3}
+      propertyPath: globalLod
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d31b94fc07f8340258addd6c68b59591, type: 3}

@@ -19,6 +19,8 @@ public class Phob : MonoBehaviour
 
     public Dictionary<byte, Color> palette;
 
+    public byte globalLod;
+
     private void Awake()
     {
         palette = BlockMesher.GetColorPalleteByte();
@@ -48,10 +50,11 @@ public class Phob : MonoBehaviour
                     blockPrefab.transform.position = transform.position
                         - new Vector3(xLength * .5f, yLength * .5f, zLength * .5f)
                         + new Vector3(x * blockXLength, y * blockYLength, z * blockZLength);
-                    blockPrefab.lodMesh = 5;
+                    blockPrefab.lodMesh = globalLod;
 
                     Block block = Instantiate<Block>(blockPrefab, transform)
-                        .FillRandom(x, y, z, xLength, yLength, zLength);
+                        .FillRandom(x, y, z, xLength, yLength, zLength)
+                        .SetLod(globalLod);
 
                     blocks[x, y, z] = block;
 
@@ -112,6 +115,7 @@ public class Phob : MonoBehaviour
             meshRate--;
 
             Block block = blockMeshQueue.Dequeue();
+
             BlockMesher.colorMap = palette;
             BlockMesher.MeshCubeFaces(block);
         }
