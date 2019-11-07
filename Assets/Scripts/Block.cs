@@ -8,6 +8,7 @@ public class Block : MonoBehaviour
 
     public int xLength, yLength, zLength;
     public Block left, right, bottom, top, back, front;
+    public byte lodMesh;
 
     private void Awake()
     {

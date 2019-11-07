@@ -48,6 +48,7 @@ public class Phob : MonoBehaviour
                     blockPrefab.transform.position = transform.position
                         - new Vector3(xLength * .5f, yLength * .5f, zLength * .5f)
                         + new Vector3(x * blockXLength, y * blockYLength, z * blockZLength);
+                    blockPrefab.lodMesh = 5;
 
                     Block block = Instantiate<Block>(blockPrefab, transform)
                         .FillRandom(x, y, z, xLength, yLength, zLength);
@@ -111,7 +112,8 @@ public class Phob : MonoBehaviour
             meshRate--;
 
             Block block = blockMeshQueue.Dequeue();
-            BlockMesher.MeshCubeFaces(block, palette);
+            BlockMesher.colorMap = palette;
+            BlockMesher.MeshCubeFaces(block);
         }
     }
 }

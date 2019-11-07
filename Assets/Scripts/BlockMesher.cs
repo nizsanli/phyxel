@@ -5,8 +5,10 @@ using UnityEngine;
 public class BlockMesher
 {
     static public Block currentBlock;
+    static public Vector3 scl;
+    static public Dictionary<byte, Color> colorMap;
 
-    public static Block MeshCubeFaces(Block block, Dictionary<byte, Color> colorMap)
+    public static Block MeshCubeFaces(Block block)
     {
         currentBlock = block;
 
@@ -15,15 +17,47 @@ public class BlockMesher
         List<Color> colors = new List<Color>();
         List<int> triangles = new List<int>();
 
-        for (int x = 0; x < block.voxels.GetLength(0); x++)
+        Dictionary<byte, Color> tempColorMap = new Dictionary<byte, Color>();
+        
+        byte[,,] data = block.voxels;
+        byte[,,] tempData;
+        for (int i = 0; i < block.lodMesh; i++)
         {
-            for (int y = 0; y < block.voxels.GetLength(1); y++)
+            tempData = new byte[data.GetLength(0) - 1, data.GetLength(1) - 1, data.GetLength(2) - 1];
+            for (int x = 0; x < tempData.GetLength(0); x++)
             {
-                for (int z = 0; z < block.voxels.GetLength(2); z++)
+                for (int y = 0; y < tempData.GetLength(1); y++)
                 {
-                    byte val = block.voxels[x, y, z];
-                    Color color = colorMap[val];
+                    for (int z = 0; z < tempData.GetLength(2); z++)
+                    {
+                        byte[] vals = { data[x, y, z], data[x + 1, y, z], data[x, y + 1, z], data[x + 1, y + 1, z] };
+                        
+                        float avgVal = ((float)vals[0] + vals[1] + vals[2] + vals[3]) / 4f;
+                        Color avgCol = (colorMap[vals[0]] + colorMap[vals[1]] + colorMap[vals[2]] + colorMap[vals[3]]) / 4f;
+                        tempColorMap[(byte)avgVal] = avgCol;
 
+                        tempData[x, y, z] = (byte)avgVal;
+                    }
+                }
+            }
+            data = tempData;
+        }
+
+        scl = new Vector3(block.voxels.GetLength(0) / (float)data.GetLength(0), block.voxels.GetLength(1) / (float)data.GetLength(1), block.voxels.GetLength(2) / (float)data.GetLength(2));
+
+        Vector3 scaledRight = Vector3.right * scl.x;
+        Vector3 scaledUp = Vector3.up * scl.y;
+        Vector3 scaledForward = Vector3.forward * scl.z;
+
+        for (int x = 0; x < data.GetLength(0); x++)
+        {
+            for (int y = 0; y < data.GetLength(1); y++)
+            {
+                for (int z = 0; z < data.GetLength(2); z++)
+                {
+                    byte val = data[x, y, z];
+                    Color color = tempColorMap[val];
+                    
                     bool isMass = block.voxels[x, y, z] > 0;
                     bool drawLeft =
                         (CoordinateInBounds(x - 1, y, z) && block.voxels[x - 1, y, z] == 0)
@@ -50,44 +84,45 @@ public class BlockMesher
                         || (!CoordinateInBounds(x, y, z + 1) && block.front != null && block.front.voxels[x, y, 0] == 0)
                         || (!CoordinateInBounds(x, y, z + 1) && block.front == null);
 
-                    Vector3 orig = new Vector3(x, y, z);
+                    Vector3 orig = new Vector3(x * scl.x, y * scl.y, z * scl.z);
 
                     // left
                     if (isMass && drawLeft)
                     {
-                        DrawFace(orig + Vector3.forward, -Vector3.forward, Vector3.up, -Vector3.right, color, 
+                        DrawFace(orig + scaledForward, -scaledForward, scaledUp, -scaledRight, color,  
                             vertices, triangles, normals, colors);
                     }
                     // right
                     if (isMass && drawRight)
                     {
-                        DrawFace(orig + Vector3.right, Vector3.forward, Vector3.up, Vector3.right, color,
+                        DrawFace(orig + scaledRight, scaledForward, scaledUp, scaledRight, color,
                             vertices, triangles, normals, colors);
                     }
                     // bot
                     if (isMass && drawBot)
                     {
-                        DrawFace(orig + Vector3.forward, Vector3.right, -Vector3.forward, -Vector3.up, color,
+                        DrawFace(orig + scaledForward, scaledRight, -scaledForward, -scaledUp, color,
                             vertices, triangles, normals, colors);
                     }
                     // top
                     if (isMass && drawTop)
                     {
-                        DrawFace(orig + Vector3.up, Vector3.right, Vector3.forward, Vector3.up, color,
+                        DrawFace(orig + scaledUp, scaledRight, scaledForward, scaledUp, color,
                             vertices, triangles, normals, colors);
                     }
                     // back
                     if (isMass && drawBack)
                     {
-                        DrawFace(orig, Vector3.right, Vector3.up, -Vector3.forward, color,
+                        DrawFace(orig, scaledRight, scaledUp, -scaledForward, color,
                             vertices, triangles, normals, colors);
                     }
                     // front
                     if (isMass && drawFront)
                     {
-                        DrawFace(orig + Vector3.forward + Vector3.right, -Vector3.right, Vector3.up, Vector3.forward, color,
+                        DrawFace(orig + scaledForward + scaledRight, -scaledRight, scaledUp, scaledForward, color,
                             vertices, triangles, normals, colors);
                     }
+                    
                 }
             }
         }
