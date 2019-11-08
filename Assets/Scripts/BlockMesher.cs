@@ -7,135 +7,92 @@ public class BlockMesher
     static public Block currentBlock;
     static public Dictionary<byte, Color> colorMap;
 
+    static List<Vector3> vertices = new List<Vector3>();
+    static List<Vector3> normals = new List<Vector3>();
+    static List<Color> colors = new List<Color>();
+    static List<int> triangles = new List<int>();
+
     public static Block MeshCubeFaces(Block block)
     {
         currentBlock = block;
 
-        List<Vector3> vertices = new List<Vector3>();
-        List<Vector3> normals = new List<Vector3>();
-        List<Color> colors = new List<Color>();
-        List<int> triangles = new List<int>();
+        vertices.Clear();
+        normals.Clear();
+        colors.Clear();
+        triangles.Clear();
 
-        
-        Dictionary<byte, Color> tempColorMap = new Dictionary<byte, Color>();
-        /*
-        for (int x = 0; x < block.lodVoxels.GetLength(0); x++)
+        for (int x = 0; x < block.Voxels.GetLength(0); x++)
         {
-            for (int y = 0; y < block.lodVoxels.GetLength(1); y++)
+            for (int y = 0; y < block.Voxels.GetLength(1); y++)
             {
-                for (int z = 0; z < block.lodVoxels.GetLength(2); z++)
+                for (int z = 0; z < block.Voxels.GetLength(2); z++)
                 {
-                    Color avgCol = Color.clear;
-                    for (int lodX = 0; lodX < 1 + block.lodMesh; lodX++)
-                    {
-                        for (int lodY = 0; lodY < 1 + block.lodMesh; lodY++)
-                        {
-                            for (int lodZ = 0; lodZ < 1 + block.lodMesh; lodZ++)
-                            {
-                                byte val = block.voxels[x + lodX, y + lodY, z + lodZ];
+                    int voxelValue = block.Voxels[x, y, z];
+                    bool voxelIsMass = voxelValue > 0;
 
-                                if (val > 0)
-                                {
-                                    avgVal += val;
-                                    avgCol += colorMap[val];
-                                    tot++;
-                                }
-                            }
-                        }
-                    }
-                    avgVal /= tot;
-                    avgCol /= tot;
+                    Vector3 orig = new Vector3(x, y, z);
+                    Color color = Color.white;
                     
-                    tempColorMap[(byte)avgVal] = avgCol;
-                    block.lodVoxels[x, y, z] = (byte)avgVal;
-                }
-            }
-        }
-        colorMap = tempColorMap;
-        */
-        Vector3 scl = new Vector3(
-            block.voxels.GetLength(0) / (float)block.lodVoxels.GetLength(0),
-            block.voxels.GetLength(1) / (float)block.lodVoxels.GetLength(1),
-            block.voxels.GetLength(2) / (float)block.lodVoxels.GetLength(2));
+                    Vector3 forward = Vector3.forward;
+                    Vector3 right = Vector3.right;
+                    Vector3 up = Vector3.up;
 
-        Vector3 scaledRight = Vector3.right * scl.x;
-        Vector3 scaledUp = Vector3.up * scl.y;
-        Vector3 scaledForward = Vector3.forward * scl.z;
-
-        for (int x = 0; x < block.lodVoxels.GetLength(0); x++)
-        {
-            for (int y = 0; y < block.lodVoxels.GetLength(1); y++)
-            {
-                for (int z = 0; z < block.lodVoxels.GetLength(2); z++)
-                {
-                    byte val = block.lodVoxels[x, y, z];
-                    Color color = colorMap[val];
-                    
-                    bool isMass = block.lodVoxels[x, y, z] > 0;
                     bool drawLeft =
-                        (CoordinateInBounds(x - 1, y, z) && block.lodVoxels[x - 1, y, z] == 0)
-                        || (!CoordinateInBounds(x - 1, y, z) && block.left != null && block.left.lodVoxels[block.left.lodVoxels.GetLength(0) - 1, y, z] == 0)
-                        || (!CoordinateInBounds(x - 1, y, z) && block.left == null);
+                        !CoordinateInBounds(x - 1, y, z) ||
+                        block.Voxels[x - 1, y, z] == 0 ||
+                        (block.xMinusBlock != null && block.xMinusBlock.Voxels[(int)block.xMinusBlock.Dimensions.x - 1, y, z] == 0);
                     bool drawRight =
-                        (CoordinateInBounds(x + 1, y, z) && block.lodVoxels[x + 1, y, z] == 0)
-                        || (!CoordinateInBounds(x + 1, y, z) && block.right != null && block.right.lodVoxels[0, y, z] == 0)
-                        || (!CoordinateInBounds(x + 1, y, z) && block.right == null);
-                    bool drawBot =
-                        (CoordinateInBounds(x, y - 1, z) && block.lodVoxels[x, y - 1, z] == 0)
-                        || (!CoordinateInBounds(x, y - 1, z) && block.bottom != null && block.bottom.lodVoxels[x, block.bottom.lodVoxels.GetLength(1) - 1, z] == 0)
-                        || (!CoordinateInBounds(x, y - 1, z) && block.bottom == null);
+                        !CoordinateInBounds(x + 1, y, z) ||
+                        block.Voxels[x + 1, y, z] == 0 ||
+                        (block.xPlusBlock != null && block.xPlusBlock.Voxels[0, y, z] == 0);
+                    bool drawBottom =
+                        !CoordinateInBounds(x, y - 1, z) ||
+                        block.Voxels[x, y - 1, z] == 0 ||
+                        (block.yMinusBlock != null && block.yMinusBlock.Voxels[x, (int)block.yMinusBlock.Dimensions.y - 1, z] == 0);
                     bool drawTop =
-                        (CoordinateInBounds(x, y + 1, z) && block.lodVoxels[x, y + 1, z] == 0)
-                        || (!CoordinateInBounds(x, y + 1, z) && block.top != null && block.top.lodVoxels[x, 0, z] == 0)
-                        || (!CoordinateInBounds(x, y + 1, z) && block.top == null);
+                        !CoordinateInBounds(x, y + 1, z) ||
+                        block.Voxels[x, y + 1, z] == 0 ||
+                        (block.yPlusBlock != null && block.yPlusBlock.Voxels[x, 0, z] == 0);
                     bool drawBack =
-                        (CoordinateInBounds(x, y, z - 1) && block.lodVoxels[x, y, z - 1] == 0)
-                        || (!CoordinateInBounds(x, y, z - 1) && block.back != null && block.back.lodVoxels[x, y, block.back.lodVoxels.GetLength(2) - 1] == 0)
-                        || (!CoordinateInBounds(x, y, z - 1) && block.back == null);
+                        !CoordinateInBounds(x, y, z - 1) ||
+                        block.Voxels[x, y, z - 1] == 0 ||
+                        (block.zMinusBlock != null && block.zMinusBlock.Voxels[x, y, (int)block.zMinusBlock.Dimensions.z - 1] == 0);
                     bool drawFront =
-                        (CoordinateInBounds(x, y, z + 1) && block.lodVoxels[x, y, z + 1] == 0)
-                        || (!CoordinateInBounds(x, y, z + 1) && block.front != null && block.front.lodVoxels[x, y, 0] == 0)
-                        || (!CoordinateInBounds(x, y, z + 1) && block.front == null);
+                        !CoordinateInBounds(x, y, z + 1) ||
+                        block.Voxels[x, y, z + 1] == 0 ||
+                        (block.zPlusBlock != null && block.zPlusBlock.Voxels[x, y, 0] == 0);
 
-                    Vector3 orig = new Vector3(x * scl.x, y * scl.y, z * scl.z);
 
                     // left
-                    if (isMass && drawLeft)
+                    if (voxelIsMass && drawLeft)
                     {
-                        DrawFace(orig + scaledForward, -scaledForward, scaledUp, -scaledRight, color,  
-                            vertices, triangles, normals, colors);
+                        DrawFace(orig + forward, -forward, up, -right, color);
                     }
                     // right
-                    if (isMass && drawRight)
+                    if (voxelIsMass && drawRight)
                     {
-                        DrawFace(orig + scaledRight, scaledForward, scaledUp, scaledRight, color,
-                            vertices, triangles, normals, colors);
+                        DrawFace(orig + right, forward, up, right, color);
                     }
-                    // bot
-                    if (isMass && drawBot)
+                    // bottom
+                    if (voxelIsMass && drawBottom)
                     {
-                        DrawFace(orig + scaledForward, scaledRight, -scaledForward, -scaledUp, color,
-                            vertices, triangles, normals, colors);
+                        DrawFace(orig + right, -right, forward, -up, color);
                     }
                     // top
-                    if (isMass && drawTop)
+                    if (voxelIsMass && drawTop)
                     {
-                        DrawFace(orig + scaledUp, scaledRight, scaledForward, scaledUp, color,
-                            vertices, triangles, normals, colors);
+                        DrawFace(orig + up, right, forward, up, color);
                     }
                     // back
-                    if (isMass && drawBack)
+                    if (voxelIsMass && drawBack)
                     {
-                        DrawFace(orig, scaledRight, scaledUp, -scaledForward, color,
-                            vertices, triangles, normals, colors);
+                        DrawFace(orig, right, up, -forward, color);
                     }
                     // front
-                    if (isMass && drawFront)
+                    if (voxelIsMass && drawFront)
                     {
-                        DrawFace(orig + scaledForward + scaledRight, -scaledRight, scaledUp, scaledForward, color,
-                            vertices, triangles, normals, colors);
+                        DrawFace(orig + forward + right, -right, up, -forward, color);
                     }
-                    
                 }
             }
         }
@@ -155,16 +112,23 @@ public class BlockMesher
         return block;
     }
 
+    public static byte LastSlice(Block block, Vector3 mask, Vector3 index, int dimension, int toggle)
+    {
+        int dimMax = block.Voxels.GetLength(dimension) - 1;
+        index = dimMax * mask + index;
+
+        return block.Voxels[(int)index.x, (int)index.y, (int)index.z];
+    }
+
     public static bool CoordinateInBounds(int x, int y, int z)
     {
         return
-            x >= 0 && x < currentBlock.lodVoxels.GetLength(0) &&
-            y >= 0 && y < currentBlock.lodVoxels.GetLength(1) &&
-            z >= 0 && z < currentBlock.lodVoxels.GetLength(2);
+            x >= 0 && x < currentBlock.Voxels.GetLength(0) &&
+            y >= 0 && y < currentBlock.Voxels.GetLength(1) &&
+            z >= 0 && z < currentBlock.Voxels.GetLength(2);
     }
 
-    static public void DrawFace(Vector3 botLeft, Vector3 right, Vector3 up, Vector3 normal, Color color, 
-        List<Vector3> vertices, List<int> triangles, List<Vector3> normals, List<Color> colors)
+    static public void DrawFace(Vector3 botLeft, Vector3 right, Vector3 up, Vector3 normal, Color color)
     {
         int count = vertices.Count;
 
@@ -191,6 +155,7 @@ public class BlockMesher
         colors.Add(color);
     }
 
+    /*
     public static Dictionary<byte, Color> GetColorPalleteByte()
     {
         Dictionary<byte, Color> colorMap = new Dictionary<byte, Color>();
@@ -201,4 +166,5 @@ public class BlockMesher
 
         return colorMap;
     }
+    */
 }
