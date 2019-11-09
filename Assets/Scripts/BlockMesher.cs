@@ -21,6 +21,8 @@ public class BlockMesher
         colors.Clear();
         triangles.Clear();
 
+        float scl = Mathf.Pow(2, block.levelOfDetail);
+
         for (int x = 0; x < block.Voxels.GetLength(0); x++)
         {
             for (int y = 0; y < block.Voxels.GetLength(1); y++)
@@ -30,37 +32,48 @@ public class BlockMesher
                     int voxelValue = block.Voxels[x, y, z];
                     bool voxelIsMass = voxelValue > 0;
 
-                    Vector3 orig = new Vector3(x, y, z);
-                    Color color = Color.white;
-                    
-                    Vector3 forward = Vector3.forward;
-                    Vector3 right = Vector3.right;
-                    Vector3 up = Vector3.up;
+                    Color color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
+
+                    Vector3 orig = scl * new Vector3(x, y, z);
+                    Vector3 forward = scl * Vector3.forward;
+                    Vector3 right = scl * Vector3.right;
+                    Vector3 up = scl * Vector3.up;
 
                     bool drawLeft =
-                        !CoordinateInBounds(x - 1, y, z) ||
-                        block.Voxels[x - 1, y, z] == 0 ||
-                        (block.xMinusBlock != null && block.xMinusBlock.Voxels[(int)block.xMinusBlock.Dimensions.x - 1, y, z] == 0);
+                        (CoordinateInBounds(x - 1, y, z) && block.Voxels[x - 1, y, z] == 0) ||
+                        (!CoordinateInBounds(x - 1, y, z) && block.xMinusBlock != null && block.xMinusBlock.levelOfDetail == block.levelOfDetail && block.xMinusBlock.Voxels[(int)block.xMinusBlock.Dimensions.x - 1, y, z] == 0) ||
+                        (!CoordinateInBounds(x - 1, y, z) && block.xMinusBlock == null) ||
+                        (!CoordinateInBounds(x - 1, y, z) && block.xMinusBlock != null && block.xMinusBlock.levelOfDetail != block.levelOfDetail);
+
                     bool drawRight =
-                        !CoordinateInBounds(x + 1, y, z) ||
-                        block.Voxels[x + 1, y, z] == 0 ||
-                        (block.xPlusBlock != null && block.xPlusBlock.Voxels[0, y, z] == 0);
+                        (CoordinateInBounds(x + 1, y, z) && block.Voxels[x + 1, y, z] == 0) ||
+                        (!CoordinateInBounds(x + 1, y, z) && block.xPlusBlock != null && block.xPlusBlock.levelOfDetail == block.levelOfDetail && block.xPlusBlock.Voxels[0, y, z] == 0) ||
+                        (!CoordinateInBounds(x + 1, y, z) && block.xPlusBlock == null) ||
+                        (!CoordinateInBounds(x + 1, y, z) && block.xPlusBlock != null && block.xPlusBlock.levelOfDetail != block.levelOfDetail);
+
                     bool drawBottom =
-                        !CoordinateInBounds(x, y - 1, z) ||
-                        block.Voxels[x, y - 1, z] == 0 ||
-                        (block.yMinusBlock != null && block.yMinusBlock.Voxels[x, (int)block.yMinusBlock.Dimensions.y - 1, z] == 0);
+                        (CoordinateInBounds(x, y - 1, z) && block.Voxels[x, y - 1, z] == 0) ||
+                        (!CoordinateInBounds(x, y - 1, z) && block.yMinusBlock != null && block.yMinusBlock.levelOfDetail == block.levelOfDetail && block.yMinusBlock.Voxels[x, (int)block.yMinusBlock.Dimensions.y - 1, z] == 0) || 
+                        (!CoordinateInBounds(x, y - 1, z) && block.yMinusBlock == null) ||
+                        (!CoordinateInBounds(x, y - 1, z) && block.yMinusBlock != null && block.yMinusBlock.levelOfDetail != block.levelOfDetail);
+
                     bool drawTop =
-                        !CoordinateInBounds(x, y + 1, z) ||
-                        block.Voxels[x, y + 1, z] == 0 ||
-                        (block.yPlusBlock != null && block.yPlusBlock.Voxels[x, 0, z] == 0);
+                        (CoordinateInBounds(x, y + 1, z) && block.Voxels[x, y + 1, z] == 0) ||
+                        (!CoordinateInBounds(x, y + 1, z) && block.yPlusBlock != null && block.yPlusBlock.levelOfDetail == block.levelOfDetail && block.yPlusBlock.Voxels[x, 0, z] == 0) || 
+                        (!CoordinateInBounds(x, y + 1, z) && block.yPlusBlock == null) ||
+                        (!CoordinateInBounds(x, y + 1, z) && block.yPlusBlock != null && block.yPlusBlock.levelOfDetail != block.levelOfDetail);
+
                     bool drawBack =
-                        !CoordinateInBounds(x, y, z - 1) ||
-                        block.Voxels[x, y, z - 1] == 0 ||
-                        (block.zMinusBlock != null && block.zMinusBlock.Voxels[x, y, (int)block.zMinusBlock.Dimensions.z - 1] == 0);
+                        (CoordinateInBounds(x, y, z - 1) && block.Voxels[x, y, z - 1] == 0) ||
+                        (!CoordinateInBounds(x, y, z - 1) && block.zMinusBlock != null && block.zMinusBlock.levelOfDetail == block.levelOfDetail && block.zMinusBlock.Voxels[x, y, (int)block.zMinusBlock.Dimensions.z - 1] == 0) || 
+                        (!CoordinateInBounds(x, y, z - 1) && block.zMinusBlock == null) ||
+                        (!CoordinateInBounds(x, y, z - 1) && block.zMinusBlock != null && block.zMinusBlock.levelOfDetail != block.levelOfDetail);
+
                     bool drawFront =
-                        !CoordinateInBounds(x, y, z + 1) ||
-                        block.Voxels[x, y, z + 1] == 0 ||
-                        (block.zPlusBlock != null && block.zPlusBlock.Voxels[x, y, 0] == 0);
+                        (CoordinateInBounds(x, y, z + 1) && block.Voxels[x, y, z + 1] == 0) ||
+                        (!CoordinateInBounds(x, y, z + 1) && block.zPlusBlock != null && block.zPlusBlock.levelOfDetail == block.levelOfDetail && block.zPlusBlock.Voxels[x, y, 0] == 0) || 
+                        (!CoordinateInBounds(x, y, z + 1) && block.zPlusBlock == null) ||
+                        (!CoordinateInBounds(x, y, z + 1) && block.zPlusBlock != null && block.zPlusBlock.levelOfDetail != block.levelOfDetail);
 
 
                     // left
@@ -96,7 +109,6 @@ public class BlockMesher
                 }
             }
         }
-        
 
         Mesh mesh = new Mesh();
         mesh.vertices = vertices.ToArray();

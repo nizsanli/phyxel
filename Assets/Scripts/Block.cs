@@ -37,11 +37,70 @@ public class Block : MonoBehaviour
         
     }
 
-    public void AllocateFirstLevel(int blockSizeX, int blockSizeY, int blockSizeZ)
+    public void AllocateHighestDetail(int blockSizeX, int blockSizeY, int blockSizeZ)
     {
-        int totalLevels = (int)Mathf.Log(Mathf.Min(blockSizeX, blockSizeY, blockSizeZ), 2);
+        int totalLevels = (int)Mathf.Log(Mathf.Min(blockSizeX, blockSizeY, blockSizeZ), 2) + 1;
         voxelLevels = new byte[totalLevels][,,];
 
-        voxelLevels[0] = new byte[blockSizeX, blockSizeY, blockSizeZ];
+        levelOfDetail = 0;
+        voxelLevels[levelOfDetail] = new byte[blockSizeX, blockSizeY, blockSizeZ];
+    }
+
+    public void AllocateLowerDetail()
+    {
+        byte[,,] higherResolutionVoxels = Voxels;
+
+        int lowerXLength = higherResolutionVoxels.GetLength(0) / 2;
+        int lowerYLength = higherResolutionVoxels.GetLength(1) / 2;
+        int lowerZLength = higherResolutionVoxels.GetLength(2) / 2;
+
+        voxelLevels[levelOfDetail + 1] = new byte[
+            lowerXLength,
+            lowerYLength,
+            lowerZLength];
+
+        levelOfDetail++;
+
+        Dictionary<byte, byte> typeCounts = new Dictionary<byte, byte>();
+
+        for (int x = 0; x < lowerXLength; x++)
+        {
+            for (int y = 0; y < lowerYLength; y++)
+            {
+                for (int z = 0; z < lowerZLength; z++)
+                {
+                    typeCounts.Clear();
+
+                    for (int xx = 0; xx < 2; xx++)
+                    {
+                        for (int yy = 0; yy < 2; yy++)
+                        {
+                            for (int zz = 0; zz < 2; zz++)
+                            {
+                                byte val = higherResolutionVoxels[x * 2 + xx, y * 2 + yy, z * 2 + zz];
+
+                                if (!typeCounts.ContainsKey(val))
+                                    typeCounts[val] = 1;
+                                else
+                                    typeCounts[val]++;
+                            }
+                        }
+                    }
+
+                    int mostCommonValue = -1;
+                    int commonCount = int.MinValue;
+                    foreach (KeyValuePair<byte, byte> pair in typeCounts)
+                    {
+                        if (pair.Value > commonCount)
+                        {
+                            mostCommonValue = pair.Key;
+                            commonCount = pair.Value;
+                        }
+                    }
+
+                    Voxels[x, y, z] = (byte)mostCommonValue;
+                }
+            }
+        }
     }
 }

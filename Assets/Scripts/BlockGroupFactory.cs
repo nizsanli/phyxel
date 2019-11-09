@@ -30,7 +30,7 @@ public class BlockGroupFactory : MonoBehaviour
         }
     }
 
-    public BlockGroup CreateRectangularPrism(int xLength, int yLength, int zLength, int voxelType = 1)
+    public BlockGroup CreateRectangularPrism(int xLength, int yLength, int zLength, Vector3 focusCenter, int voxelType = 1)
     {
         int blockSizeX, blockSizeY, blockSizeZ;
         blockSizeX = blockSizeY = blockSizeZ = 1;
@@ -58,7 +58,7 @@ public class BlockGroupFactory : MonoBehaviour
                 for (int zBlock = 0; zBlock < numBlocksZ; zBlock++)
                 {
                     Block block = blockGroup.blocks[xBlock, yBlock, zBlock];
-                    block.AllocateFirstLevel(blockSizeX, blockSizeY, blockSizeZ);
+                    block.AllocateHighestDetail(blockSizeX, blockSizeY, blockSizeZ);
 
                     int xCut = (xBlock + 1) * blockSizeX <= xLength ? blockSizeX : xLength - (xBlock * blockSizeX);
                     int yCut = (yBlock + 1) * blockSizeY <= yLength ? blockSizeY : yLength - (yBlock * blockSizeY);
@@ -74,6 +74,16 @@ public class BlockGroupFactory : MonoBehaviour
                                 voxels[x, y, z] = (byte)voxelType;
                             }
                         }
+                    }
+
+                    block.transform.position = Vector3.Scale(new Vector3(xBlock, yBlock, zBlock), new Vector3(blockSizeX, blockSizeY, blockSizeZ));
+
+                    int focusLevels = (int)Mathf.Min(
+                        (int)(Vector3.Distance(block.transform.position, focusCenter) / (16 * 32)),
+                        Mathf.Log(Mathf.Min(blockSizeX, blockSizeY, blockSizeZ), 2));
+                    for (int i = 0; i < focusLevels; i++)
+                    {
+                        block.AllocateLowerDetail();
                     }
 
                     // add to mesh queue
