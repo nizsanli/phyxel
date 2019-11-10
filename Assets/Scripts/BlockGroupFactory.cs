@@ -60,36 +60,40 @@ public class BlockGroupFactory : MonoBehaviour
                 for (int zBlock = 0; zBlock < numBlocksZ; zBlock++)
                 {
                     Block block = blockGroup.blocks[xBlock, yBlock, zBlock];
-                    block.AllocateHighestDetail(blockSizeX, blockSizeY, blockSizeZ);
+                    block.SetResolution(blockSizeX, blockSizeY, blockSizeZ);
 
                     int xCut = (xBlock + 1) * blockSizeX <= xLength ? blockSizeX : xLength - (xBlock * blockSizeX);
                     int yCut = (yBlock + 1) * blockSizeY <= yLength ? blockSizeY : yLength - (yBlock * blockSizeY);
                     int zCut = (zBlock + 1) * blockSizeZ <= zLength ? blockSizeZ : zLength - (zBlock * blockSizeZ);
 
-                    byte[,,] voxels = block.voxelLevels[0];
+                    byte[,,] voxels = block.dataLevels[0];
                     for (int x = 0; x < xCut; x++)
                     {
                         for (int y = 0; y < yCut; y++)
                         {
                             for (int z = 0; z < zCut; z++)
                             {
-                                voxels[x, y, z] = (byte)voxelType;
+                                if (Random.Range(0, 10) < 5)
+                                    voxels[x, y, z] = (byte)voxelType;
                             }
                         }
                     }
 
                     block.transform.position = Vector3.Scale(new Vector3(xBlock, yBlock, zBlock), new Vector3(blockSizeX, blockSizeY, blockSizeZ));
 
-                    int focusLevels = (int)Mathf.Min(
-                        (int)(Vector3.Distance(block.transform.position, focusCenter) / (64 * 16)),
+                    int lod = (int)Mathf.Min(
+                        Vector3.Distance(block.transform.position, focusCenter) / (block.ResolutionY * 4),
                         Mathf.Log(Mathf.Max(blockSizeX, blockSizeY, blockSizeZ), 2));
-                    for (int i = 0; i < focusLevels; i++)
-                    {
-                        block.AllocateLowerDetail();
-                    }
 
+                    if (lod > 0)
+                    {
+                        block.AddDetailLevel(lod);
+                        block.levelOfDetail = (byte)lod;
+                    }
+                    
                     // add to mesh queue
                     blockMeshQueue.Enqueue(block);
+                    
                 }
             }
         }

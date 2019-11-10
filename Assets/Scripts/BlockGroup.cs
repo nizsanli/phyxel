@@ -5,6 +5,7 @@ using UnityEngine;
 public class BlockGroup : MonoBehaviour
 {
     public Block[,,] blocks;
+    public int levelOfDetail;
 
     public Block blockPrefab;
 
