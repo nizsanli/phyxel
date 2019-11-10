@@ -12,6 +12,11 @@ public class BlockGroupFactory : MonoBehaviour
     public Queue<Block> blockMeshQueue;
     public int blockMeshRate;
 
+    public Dictionary<int, List<Block>> meshChainMap;
+    public Queue<Transform> blockMeshChains;
+
+    public Transform blockMeshChainPrefab;
+
     private void Awake()
     {
         blockMeshQueue = new Queue<Block>();
@@ -90,12 +95,31 @@ public class BlockGroupFactory : MonoBehaviour
                         block.AddDetailLevel(lod);
                         block.levelOfDetail = (byte)lod;
                     }
-                    
+
+                    if (!meshChainMap.ContainsKey(lod))
+                    {
+                        meshChainMap[lod] = new List<Block>();
+                    }
+                    meshChainMap[lod].Add(block);
+
                     // add to mesh queue
-                    blockMeshQueue.Enqueue(block);
-                    
+                    // blockMeshQueue.Enqueue(block);
                 }
             }
+        }
+
+        foreach (var chain in meshChainMap)
+        {
+            int lod = chain.Key;
+            List<Block> blocks = meshChainMap[lod];
+
+            List<Vector3> vertices = new List<Vector3>();
+            List<Vector3> normals = new List<Vector3>();
+            List<Color> colors = new List<Color>();
+            List<int> triangles = new List<int>();
+
+            int numChains = (int)(blocks.Count / Mathf.Pow(Mathf.Pow(2, lod), 3));
+            
         }
 
         return blockGroup;
