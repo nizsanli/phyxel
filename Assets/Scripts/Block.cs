@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Block : MonoBehaviour
 {
-    // links to adjacent blocks
     public Block xMinusBlock, xPlusBlock, yMinusBlock, yPlusBlock, zMinusBlock, zPlusBlock;
 
     public byte levelOfDetail;
@@ -39,7 +38,7 @@ public class Block : MonoBehaviour
 
     public void AllocateHighestDetail(int blockSizeX, int blockSizeY, int blockSizeZ)
     {
-        int totalLevels = (int)Mathf.Log(Mathf.Min(blockSizeX, blockSizeY, blockSizeZ), 2) + 1;
+        int totalLevels = (int)Mathf.Log(Mathf.Max(blockSizeX, blockSizeY, blockSizeZ), 2) + 1;
         voxelLevels = new byte[totalLevels][,,];
 
         levelOfDetail = 0;
@@ -49,10 +48,13 @@ public class Block : MonoBehaviour
     public void AllocateLowerDetail()
     {
         byte[,,] higherResolutionVoxels = Voxels;
+        int higherXLength = higherResolutionVoxels.GetLength(0);
+        int higherYLength = higherResolutionVoxels.GetLength(1);
+        int higherZLength = higherResolutionVoxels.GetLength(2);
 
-        int lowerXLength = higherResolutionVoxels.GetLength(0) / 2;
-        int lowerYLength = higherResolutionVoxels.GetLength(1) / 2;
-        int lowerZLength = higherResolutionVoxels.GetLength(2) / 2;
+        int lowerXLength = Mathf.Clamp(higherXLength / 2, 1, int.MaxValue);
+        int lowerYLength = Mathf.Clamp(higherYLength / 2, 1, int.MaxValue);
+        int lowerZLength = Mathf.Clamp(higherZLength / 2, 1, int.MaxValue);
 
         voxelLevels[levelOfDetail + 1] = new byte[
             lowerXLength,
@@ -71,13 +73,17 @@ public class Block : MonoBehaviour
                 {
                     typeCounts.Clear();
 
-                    for (int xx = 0; xx < 2; xx++)
+                    int endX = System.Math.Min(x * 2 + 2, higherXLength);
+                    int endY = System.Math.Min(y * 2 + 2, higherYLength);
+                    int endZ = System.Math.Min(z * 2 + 2, higherZLength);
+
+                    for (int xx = x * 2; xx < endX; xx++)
                     {
-                        for (int yy = 0; yy < 2; yy++)
+                        for (int yy = y * 2; yy < endY; yy++)
                         {
-                            for (int zz = 0; zz < 2; zz++)
+                            for (int zz = z * 2; zz < endZ; zz++)
                             {
-                                byte val = higherResolutionVoxels[x * 2 + xx, y * 2 + yy, z * 2 + zz];
+                                byte val = higherResolutionVoxels[xx, yy, zz];
 
                                 if (!typeCounts.ContainsKey(val))
                                     typeCounts[val] = 1;

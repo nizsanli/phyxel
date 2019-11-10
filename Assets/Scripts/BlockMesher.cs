@@ -21,7 +21,10 @@ public class BlockMesher
         colors.Clear();
         triangles.Clear();
 
-        float scl = Mathf.Pow(2, block.levelOfDetail);
+        Vector3 scl = new Vector3(
+            block.voxelLevels[0].GetLength(0) / block.Voxels.GetLength(0),
+            block.voxelLevels[0].GetLength(1) / block.Voxels.GetLength(1),
+            block.voxelLevels[0].GetLength(2) / block.Voxels.GetLength(2));
 
         for (int x = 0; x < block.Voxels.GetLength(0); x++)
         {
@@ -34,10 +37,10 @@ public class BlockMesher
 
                     Color color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
 
-                    Vector3 orig = scl * new Vector3(x, y, z);
-                    Vector3 forward = scl * Vector3.forward;
-                    Vector3 right = scl * Vector3.right;
-                    Vector3 up = scl * Vector3.up;
+                    Vector3 orig = Vector3.Scale(new Vector3(x, y, z), scl);
+                    Vector3 forward = Vector3.Scale(Vector3.forward, scl);
+                    Vector3 right = Vector3.Scale(Vector3.right, scl);
+                    Vector3 up = Vector3.Scale(Vector3.up, scl);
 
                     bool drawLeft =
                         (CoordinateInBounds(x - 1, y, z) && block.Voxels[x - 1, y, z] == 0) ||

@@ -42,6 +42,8 @@ public class BlockGroupFactory : MonoBehaviour
             blockSizeZ = System.Math.Min(zLength, blockSizeZ * 2);
         }
 
+        //Debug.Log(string.Join(" ", blockSizeX, blockSizeY, blockSizeZ));
+
         int numBlocksX, numBlocksY, numBlocksZ;
         numBlocksX = Mathf.CeilToInt(xLength / blockSizeX);
         numBlocksY = Mathf.CeilToInt(yLength / blockSizeY);
@@ -79,8 +81,8 @@ public class BlockGroupFactory : MonoBehaviour
                     block.transform.position = Vector3.Scale(new Vector3(xBlock, yBlock, zBlock), new Vector3(blockSizeX, blockSizeY, blockSizeZ));
 
                     int focusLevels = (int)Mathf.Min(
-                        (int)(Vector3.Distance(block.transform.position, focusCenter) / (16 * 32)),
-                        Mathf.Log(Mathf.Min(blockSizeX, blockSizeY, blockSizeZ), 2));
+                        (int)(Vector3.Distance(block.transform.position, focusCenter) / (64 * 16)),
+                        Mathf.Log(Mathf.Max(blockSizeX, blockSizeY, blockSizeZ), 2));
                     for (int i = 0; i < focusLevels; i++)
                     {
                         block.AllocateLowerDetail();
