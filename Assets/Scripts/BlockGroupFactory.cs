@@ -9,21 +9,31 @@ public class BlockGroupFactory : MonoBehaviour
 
     public int maxVolume;
 
-    public Queue<Block> blockMeshQueue;
     public int blockMeshRate;
 
+    public Queue<BlockMeshChain> blockMeshChains;
     public Dictionary<int, List<Block>> meshChainMap;
-    public Queue<Transform> blockMeshChains;
 
-    public Transform blockMeshChainPrefab;
+    public BlockMeshChain blockMeshChainPrefab;
 
     private void Awake()
     {
-        blockMeshQueue = new Queue<Block>();
+        blockMeshChains = new Queue<BlockMeshChain>();
     }
 
     private void Update()
     {
+        int chainsLeftToMesh = blockMeshRate;
+        while (blockMeshChains.Count > 0 && chainsLeftToMesh > 0)
+        {
+            chainsLeftToMesh--;
+
+            BlockMeshChain chain = blockMeshChains.Dequeue();
+
+            chain.MeshBlocks();
+        }
+        
+        /*
         int blocksLeftToMesh = blockMeshRate;
         while (blockMeshQueue.Count > 0 && blocksLeftToMesh > 0)
         {
@@ -33,6 +43,7 @@ public class BlockGroupFactory : MonoBehaviour
 
             BlockMesher.MeshCubeFaces(block);
         }
+        */
     }
 
     public BlockGroup CreateRectangularPrism(int xLength, int yLength, int zLength, Vector3 focusCenter, int voxelType = 1)
@@ -58,6 +69,8 @@ public class BlockGroupFactory : MonoBehaviour
         BlockGroup blockGroup = Instantiate(blockGroupPrefab, transform);
         blockGroup.AllocateBlocks(numBlocksX, numBlocksY, numBlocksZ);
 
+        meshChainMap = new Dictionary<int, List<Block>>();
+
         for (int xBlock = 0; xBlock < numBlocksX; xBlock++)
         {
             for (int yBlock = 0; yBlock < numBlocksY; yBlock++)
@@ -78,16 +91,16 @@ public class BlockGroupFactory : MonoBehaviour
                         {
                             for (int z = 0; z < zCut; z++)
                             {
-                                if (Random.Range(0, 10) < 5)
+                                if (Random.Range(0, 10) < 11)
                                     voxels[x, y, z] = (byte)voxelType;
                             }
                         }
                     }
 
-                    block.transform.position = Vector3.Scale(new Vector3(xBlock, yBlock, zBlock), new Vector3(blockSizeX, blockSizeY, blockSizeZ));
+                    block.position = Vector3.Scale(new Vector3(xBlock, yBlock, zBlock), new Vector3(blockSizeX, blockSizeY, blockSizeZ));
 
                     int lod = (int)Mathf.Min(
-                        Vector3.Distance(block.transform.position, focusCenter) / (block.ResolutionY * 4),
+                        Vector3.Distance(block.position, focusCenter) / (block.ResolutionY * 8),
                         Mathf.Log(Mathf.Max(blockSizeX, blockSizeY, blockSizeZ), 2));
 
                     if (lod > 0)
@@ -108,19 +121,28 @@ public class BlockGroupFactory : MonoBehaviour
             }
         }
 
-        foreach (var chain in meshChainMap)
+        foreach (var pair in meshChainMap)
         {
-            int lod = chain.Key;
+            int lod = pair.Key;
             List<Block> blocks = meshChainMap[lod];
-
-            List<Vector3> vertices = new List<Vector3>();
-            List<Vector3> normals = new List<Vector3>();
-            List<Color> colors = new List<Color>();
-            List<int> triangles = new List<int>();
-
-            int numChains = (int)(blocks.Count / Mathf.Pow(Mathf.Pow(2, lod), 3));
             
+            int maxBlocksPerChain = (int)Mathf.Pow(Mathf.Pow(2, lod), 3);
+            int numChains = Mathf.CeilToInt(blocks.Count / (float)maxBlocksPerChain);
+            
+            for (int i = 0; i < numChains; i++)
+            {
+                BlockMeshChain chain = Instantiate<BlockMeshChain>(blockMeshChainPrefab, blockGroup.transform);
+
+                for (int k = 0; k < maxBlocksPerChain && i * maxBlocksPerChain + k < blocks.Count; k++)
+                {
+                    chain.AddBlock(blocks[i * maxBlocksPerChain + k]);
+                }
+
+                blockMeshChains.Enqueue(chain);
+            }
         }
+
+        meshChainMap.Clear();
 
         return blockGroup;
     }

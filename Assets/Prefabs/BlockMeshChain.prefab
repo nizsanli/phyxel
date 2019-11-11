@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5205540074953350622}
   - component: {fileID: 7642639664809551755}
   - component: {fileID: 8722331492007139797}
+  - component: {fileID: -5250195264913543432}
   m_Layer: 0
   m_Name: BlockMeshChain
   m_TagString: Untagged
@@ -78,3 +79,16 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &-5250195264913543432
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5567035245921241946}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cf8603b451b742a2af04e3509074b89, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blocks: []

@@ -31,11 +31,13 @@ public class BlockGroup : MonoBehaviour
             {
                 for (int z = 0; z < numBlocksZ; z++)
                 {
+                    /*
                     Block block = Instantiate<Block>(
                         blockPrefab,
                         transform);
+                    */
 
-                    blocks[x, y, z] = block;
+                    blocks[x, y, z] = new Block();
                 }
             }
         }

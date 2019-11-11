@@ -12,14 +12,14 @@ public class BlockMesher
     static List<Color> colors = new List<Color>();
     static List<int> triangles = new List<int>();
 
-    public static Block MeshCubeFaces(Block block)
+    public static void MeshCubeFaces(Block block)
     {
         currentBlock = block;
 
-        vertices.Clear();
-        normals.Clear();
-        colors.Clear();
-        triangles.Clear();
+        //vertices.Clear();
+        //normals.Clear();
+        //colors.Clear();
+        //triangles.Clear();
 
         Vector3 scl = new Vector3(
             block.ResolutionX / block.LengthX,
@@ -37,7 +37,7 @@ public class BlockMesher
 
                     Color color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
 
-                    Vector3 orig = Vector3.Scale(new Vector3(x, y, z), scl);
+                    Vector3 orig = block.position + Vector3.Scale(new Vector3(x, y, z), scl);
                     Vector3 forward = Vector3.Scale(Vector3.forward, scl);
                     Vector3 right = Vector3.Scale(Vector3.right, scl);
                     Vector3 up = Vector3.Scale(Vector3.up, scl);
@@ -113,6 +113,7 @@ public class BlockMesher
             }
         }
 
+        /*
         Mesh mesh = new Mesh();
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
@@ -123,8 +124,9 @@ public class BlockMesher
         mesh.Optimize();
 
         block.GetComponent<MeshFilter>().sharedMesh = mesh;
+        */
 
-        return block;
+        //return mesh;
     }
 
     public static byte LastSlice(Block block, Vector3 mask, Vector3 index, int dimension, int toggle)
@@ -168,6 +170,25 @@ public class BlockMesher
         colors.Add(color);
         colors.Add(color);
         colors.Add(color);
+    }
+
+    public static void Clear()
+    {
+        vertices.Clear();
+        normals.Clear();
+        colors.Clear();
+        triangles.Clear();
+    }
+
+    public static void FillMesh(Mesh mesh)
+    {
+        mesh.vertices = vertices.ToArray();
+        mesh.triangles = triangles.ToArray();
+        mesh.normals = normals.ToArray();
+        mesh.colors = colors.ToArray();
+
+        mesh.RecalculateBounds();
+        mesh.Optimize();
     }
 
     /*

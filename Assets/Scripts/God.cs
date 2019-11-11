@@ -13,7 +13,7 @@ public class God : MonoBehaviour
         BlockGroupFactory factory = Instantiate<BlockGroupFactory>(factoryPrefab);
 
 
-        BlockGroup prism = factory.CreateRectangularPrism(320, 320, 320, player.transform.position, 1);
+        BlockGroup prism = factory.CreateRectangularPrism(6400, 16, 6400, player.transform.position, 1);
     }
 
     // Update is called once per frame

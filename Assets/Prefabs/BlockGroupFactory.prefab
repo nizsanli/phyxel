@@ -49,3 +49,5 @@ MonoBehaviour:
     type: 3}
   maxVolume: 4096
   blockMeshRate: 1
+  blockMeshChainPrefab: {fileID: -5250195264913543432, guid: 98e1d9f649e214c0e97b10be2f937acb,
+    type: 3}
