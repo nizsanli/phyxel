@@ -100,7 +100,7 @@ public class BlockGroupFactory : MonoBehaviour
                     block.position = Vector3.Scale(new Vector3(xBlock, yBlock, zBlock), new Vector3(blockSizeX, blockSizeY, blockSizeZ));
 
                     int lod = (int)Mathf.Min(
-                        Vector3.Distance(block.position, focusCenter) / (block.ResolutionY * 8),
+                        Vector3.Distance(block.position, focusCenter) / (block.ResolutionX * 2),
                         Mathf.Log(Mathf.Max(blockSizeX, blockSizeY, blockSizeZ), 2));
 
                     if (lod > 0)
@@ -125,10 +125,16 @@ public class BlockGroupFactory : MonoBehaviour
         {
             int lod = pair.Key;
             List<Block> blocks = meshChainMap[lod];
+            Block blockSample = blocks[0];
+
+            int lod2 = 0;
+            lod2 += System.Convert.ToInt32(blockSample.ResolutionX > blockSample.LengthX);
+            lod2 += System.Convert.ToInt32(blockSample.ResolutionY > blockSample.LengthY);
+            lod2 += System.Convert.ToInt32(blockSample.ResolutionZ > blockSample.LengthZ);
             
-            int maxBlocksPerChain = (int)Mathf.Pow(Mathf.Pow(2, lod), 3);
+            int maxBlocksPerChain = (int)Mathf.Pow(Mathf.Pow(2, lod), lod2);
             int numChains = Mathf.CeilToInt(blocks.Count / (float)maxBlocksPerChain);
-            
+
             for (int i = 0; i < numChains; i++)
             {
                 BlockMeshChain chain = Instantiate<BlockMeshChain>(blockMeshChainPrefab, blockGroup.transform);

@@ -86,12 +86,12 @@ public class Block
         int lowerZLength = Mathf.Clamp(ResolutionZ / div, 1, ResolutionZ);
 
         int xDiv = ResolutionX / lowerXLength;
-        int yDiv = ResolutionX / lowerXLength;
-        int zDiv = ResolutionX / lowerXLength;
+        int yDiv = ResolutionY / lowerYLength;
+        int zDiv = ResolutionZ / lowerZLength;
 
         dataLevels[level] = new byte[lowerXLength, lowerYLength, lowerZLength];
 
-        Dictionary<byte, byte> counts = new Dictionary<byte, byte>();
+        Dictionary<byte, int> counts = new Dictionary<byte, int>();
 
         for (int x = 0; x < lowerXLength; x++)
         {
@@ -104,11 +104,11 @@ public class Block
                     int mostCommonVal = 0;
                     int mostCommonCount = int.MinValue;
 
-                    for (int kernelX = x * xDiv; kernelX < x * xDiv + xDiv; kernelX++)
+                    for (int kernelX = x * xDiv; kernelX < x * xDiv + xDiv && kernelX < ResolutionX; kernelX++)
                     {
-                        for (int kernelY = y * yDiv; kernelY < y * yDiv + yDiv; kernelY++)
+                        for (int kernelY = y * yDiv; kernelY < y * yDiv + yDiv && kernelY < ResolutionY; kernelY++)
                         {
-                            for (int kernelZ = z * zDiv; kernelZ < z * zDiv + zDiv; kernelZ++)
+                            for (int kernelZ = z * zDiv; kernelZ < z * zDiv + zDiv && kernelZ < ResolutionZ; kernelZ++)
                             {
                                 byte val = dataLevels[0][kernelX, kernelY, kernelZ];
 
@@ -122,7 +122,6 @@ public class Block
                                 if (counts[val] > mostCommonCount)
                                 {
                                     mostCommonVal = val;
-                                    mostCommonCount = counts[val];
                                 }
                             }
                         }
