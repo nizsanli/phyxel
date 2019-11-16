@@ -10,16 +10,42 @@ public class Chunk
 
     public ushort[,,] colorGrid;
 
-    public Vector3 position;
+    public int indexX, indexY, indexZ;
 
     public Chunk xMinusChunk, xPlusChunk, yMinusChunk, yPlusChunk, zMinusChunk, zPlusChunk;
 
-    public int[] MaxResolution
+    public Chunk(int x, int y, int z)
+    {
+        indexX = x;
+        indexY = y;
+        indexZ = z;
+    }
+
+    #region Properties
+
+    public int SizeX
+    {
+        get { return typeGrid.GetLength(0); }
+    }
+
+    public int SizeY
+    {
+        get { return typeGrid.GetLength(1); }
+    }
+
+    public int SizeZ
+    {
+        get { return typeGrid.GetLength(2); }
+    }
+
+    public int[] Size
     {
         get { return new int[] { typeGrid.GetLength(0), typeGrid.GetLength(1), typeGrid.GetLength(2) }; }
     }
 
-    public void SetMaxResolution(int lengthX, int lengthY, int lengthZ)
+    #endregion
+
+    public void SetSize(int lengthX, int lengthY, int lengthZ)
     {
         typeGrid = new ushort[lengthX, lengthY, lengthZ];
         colorGrid = new ushort[lengthX, lengthY, lengthZ];

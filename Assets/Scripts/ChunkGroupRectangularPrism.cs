@@ -6,33 +6,20 @@ public class ChunkGroupRectangularPrism : ChunkGroup
 {
     public int unitsX, unitsY, unitsZ;
 
-    private void Awake()
+    protected override void Awake()
     {
         chunkSizeXYZ = Chunk.MaxVolumeDimensions(unitsX, unitsY, unitsZ);
 
-        int[] numBlocksXYZ =
+        int[] numChunksXYZ =
         {
             Mathf.CeilToInt(unitsX / chunkSizeXYZ[0]),
             Mathf.CeilToInt(unitsY / chunkSizeXYZ[1]),
             Mathf.CeilToInt(unitsZ / chunkSizeXYZ[2])
         };
 
-        chunks = new Chunk[numBlocksXYZ[0], numBlocksXYZ[1], numBlocksXYZ[2]];
+        chunks = new Chunk[numChunksXYZ[0], numChunksXYZ[1], numChunksXYZ[2]];
 
-        allocationQueue = new Queue<Chunk>();
-        for (int x = 0; x < numBlocksXYZ[0]; x++)
-        {
-            for (int y = 0; y < numBlocksXYZ[1]; y++)
-            {
-                for (int z = 0; z < numBlocksXYZ[2]; z++)
-                {
-                    Chunk chunk = new Chunk();
-                    chunks[x, y, z] = chunk;
-
-                    allocationQueue.Enqueue(chunk);
-                }
-            }
-        }
+        base.Awake();
     }
 
     // Start is called before the first frame update
@@ -42,45 +29,27 @@ public class ChunkGroupRectangularPrism : ChunkGroup
     }
 
     // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
-        
+        base.Update();
     }
 
     protected override void Fill(Chunk chunk)
     {
-        int[] resolutionXYZ = chunk.MaxResolution;
+        int[] resolutionXYZ = chunk.Size;
 
-        resolutionXYZ[0] = (int)(Mathf.Min((chunk.position.x + 1) * resolutionXYZ[0], unitsX) - (chunk.position.x + 1) * resolutionXYZ[0]);
-        resolutionXYZ[1] = (int)(Mathf.Min((chunk.position.y + 1) * resolutionXYZ[1], unitsY) - (chunk.position.y + 1) * resolutionXYZ[1]);
-        resolutionXYZ[2] = (int)(Mathf.Min((chunk.position.z + 1) * resolutionXYZ[2], unitsZ) - (chunk.position.z + 1) * resolutionXYZ[2]);
+        resolutionXYZ[0] = (int)(Mathf.Min((chunk.indexX + 1) * resolutionXYZ[0], unitsX) - chunk.indexX * resolutionXYZ[0]);
+        resolutionXYZ[1] = (int)(Mathf.Min((chunk.indexY + 1) * resolutionXYZ[1], unitsY) - chunk.indexY * resolutionXYZ[1]);
+        resolutionXYZ[2] = (int)(Mathf.Min((chunk.indexZ + 1) * resolutionXYZ[2], unitsZ) - chunk.indexZ * resolutionXYZ[2]);
 
         for (int x = 0; x < resolutionXYZ[0]; x++)
         {
             for (int y = 0; y < resolutionXYZ[1]; y++)
             {
-                for (int z = 0; x < resolutionXYZ[2]; z++)
+                for (int z = 0; z < resolutionXYZ[2]; z++)
                 {
                     chunk.typeGrid[x, y, z] = 1;
                     chunk.colorGrid[x, y, z] = ushort.MaxValue;
-                }
-            }
-        }
-    }
-
-    protected override void Render(Chunk chunk)
-    {
-        int[] resolutionXYZ = chunk.MaxResolution;
-
-        
-
-        for (int x = 0; x < resolutionXYZ[0]; x++)
-        {
-            for (int y = 0; y < resolutionXYZ[1]; y++)
-            {
-                for (int z = 0; x < resolutionXYZ[2]; z++)
-                {
-
                 }
             }
         }
