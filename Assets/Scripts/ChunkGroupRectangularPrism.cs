@@ -12,9 +12,9 @@ public class ChunkGroupRectangularPrism : ChunkGroup
 
         int[] numChunksXYZ =
         {
-            Mathf.CeilToInt(unitsX / chunkSizeXYZ[0]),
-            Mathf.CeilToInt(unitsY / chunkSizeXYZ[1]),
-            Mathf.CeilToInt(unitsZ / chunkSizeXYZ[2])
+            Mathf.CeilToInt((float)unitsX / chunkSizeXYZ[0]),
+            Mathf.CeilToInt((float)unitsY / chunkSizeXYZ[1]),
+            Mathf.CeilToInt((float)unitsZ / chunkSizeXYZ[2])
         };
 
         chunks = new Chunk[numChunksXYZ[0], numChunksXYZ[1], numChunksXYZ[2]];
