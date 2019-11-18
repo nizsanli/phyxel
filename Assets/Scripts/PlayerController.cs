@@ -29,23 +29,25 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float zButton = Input.GetAxisRaw("Vertical") * Time.deltaTime;
-        float xButton = Input.GetAxisRaw("Horizontal") * Time.deltaTime;
+        float zButton = Input.GetAxisRaw("Vertical");
+        float xButton = Input.GetAxisRaw("Horizontal");
 
         GetComponent<CharacterController>().Move(
-          Quaternion.Euler(0f, headRotation.y, 0f) * new Vector3(xButton, 0f, zButton) * moveSpeed);
+          Quaternion.Euler(0f, headRotation.y, 0f) * new Vector3(xButton, 0f, zButton).normalized * moveSpeed);
 
         //GetComponent<CharacterController>().Move(
         //    headCam.transform.rotation * new Vector3(xButton, 0f, zButton) * moveSpeed);
 
-        float xMouse = Input.GetAxisRaw("Mouse X") * Time.deltaTime;
-        float yMouse = Input.GetAxisRaw("Mouse Y") * Time.deltaTime;
+        float xMouse = Input.GetAxisRaw("Mouse X");
+        float yMouse = Input.GetAxisRaw("Mouse Y");
 
         headRotation += new Vector3(-yMouse, xMouse, 0f) * rotateSpeed;
         //headRotation += Input.GetMouseButton(1) ? new Vector3(-yMouse, xMouse, 0f) * 3f : Vector3.zero;
         //headRotation += new Vector3(0f, xMouse, 0f) * rotateSpeed;
         headCam.transform.rotation = Quaternion.Euler(headRotation);
         headCam.transform.position = transform.position;
+
+        
     }
 
     private void FixedUpdate()

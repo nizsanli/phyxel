@@ -114,7 +114,7 @@ public static class ChunkCubesMesher
         mesh.normals = normals.ToArray();
         mesh.colors = colors.ToArray();
 
-        //mesh.RecalculateBounds();
+        mesh.RecalculateBounds();
         //mesh.Optimize();
 
         return mesh;

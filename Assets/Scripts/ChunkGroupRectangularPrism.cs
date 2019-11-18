@@ -19,6 +19,10 @@ public class ChunkGroupRectangularPrism : ChunkGroup
 
         chunks = new Chunk[numChunksXYZ[0], numChunksXYZ[1], numChunksXYZ[2]];
 
+        BoxCollider c = gameObject.AddComponent<BoxCollider>();
+        c.size = new Vector3(unitsX, unitsY, unitsZ);
+        c.center = c.size * .5f;
+
         base.Awake();
     }
 
