@@ -5,6 +5,7 @@ using UnityEngine;
 public abstract class ChunkGroup : MonoBehaviour
 {
     public Chunk[,,] chunks;
+    public MeshFilter[,,] chunkMeshes;
     public int[] chunkSizeXYZ;
 
     public Queue<Chunk> allocationQueue;
@@ -15,7 +16,7 @@ public abstract class ChunkGroup : MonoBehaviour
     public int fillRate;
     public int renderRate;
 
-    public MeshFilter chunkMesh;
+    public MeshFilter chunkMeshPrefab;
 
     protected virtual void Awake()
     {
@@ -111,8 +112,38 @@ public abstract class ChunkGroup : MonoBehaviour
 
     protected void Render(Chunk chunk)
     {
-        Mesh mesh = ChunkCubesMesher.Mesh(chunk);
+        Mesh mesh = ChunkCubesMesher.Mesh(chunk, this);
 
-        Instantiate<MeshFilter>(chunkMesh, transform).mesh = mesh;
+        MeshFilter cMesh = Instantiate<MeshFilter>(chunkMeshPrefab, transform);
+        cMesh.mesh = mesh;
+
+        chunkMeshes[chunk.indexX, chunk.indexY, chunk.indexZ] = cMesh;
+    }
+
+    public void RegisterHit(RaycastHit hitInfo)
+    {
+        Vector3 pt = transform.InverseTransformPoint(hitInfo.point) - Vector3.one * .00001f;
+
+        Vector3 indexPt = Vector3.Scale(pt, new Vector3(1f / chunkSizeXYZ[0], 1f / chunkSizeXYZ[1], 1f / chunkSizeXYZ[2]));
+
+        int chunkX, chunkY, chunkZ;
+        chunkX = (int)indexPt.x;
+        chunkY = (int)indexPt.y;
+        chunkZ = (int)indexPt.z;
+        
+
+        Chunk impactedChunk = chunks[chunkX, chunkY, chunkZ];
+        MeshFilter cMesh = chunkMeshes[chunkX, chunkY, chunkZ];
+
+        int x, y, z;
+        x = (int)pt.x - (chunkX * chunkSizeXYZ[0]);
+        y = (int)pt.y - (chunkY * chunkSizeXYZ[1]);
+        z = (int)pt.z - (chunkZ * chunkSizeXYZ[2]);
+
+
+        impactedChunk.typeGrid[x, y, z] = 0;
+
+        Mesh mesh = ChunkCubesMesher.Mesh(impactedChunk, this);
+        cMesh.mesh = mesh;
     }
 }

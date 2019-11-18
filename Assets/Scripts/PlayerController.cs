@@ -23,6 +23,8 @@ public class PlayerController : MonoBehaviour
         headCam.transform.position = transform.position;
         headCam.transform.rotation = transform.rotation;
 
+        Cursor.lockState = CursorLockMode.Locked;
+
         headRotation = transform.rotation.eulerAngles;
     }
 
@@ -33,7 +35,7 @@ public class PlayerController : MonoBehaviour
         float xButton = Input.GetAxisRaw("Horizontal");
 
         GetComponent<CharacterController>().Move(
-          Quaternion.Euler(0f, headRotation.y, 0f) * new Vector3(xButton, 0f, zButton).normalized * moveSpeed);
+          Quaternion.Euler(0f, headRotation.y, 0f) * new Vector3(xButton, 0f, zButton).normalized * moveSpeed * Time.deltaTime);
 
         //GetComponent<CharacterController>().Move(
         //    headCam.transform.rotation * new Vector3(xButton, 0f, zButton) * moveSpeed);
@@ -41,13 +43,28 @@ public class PlayerController : MonoBehaviour
         float xMouse = Input.GetAxisRaw("Mouse X");
         float yMouse = Input.GetAxisRaw("Mouse Y");
 
-        headRotation += new Vector3(-yMouse, xMouse, 0f) * rotateSpeed;
+        headRotation += new Vector3(-yMouse, xMouse, 0f) * rotateSpeed * Time.deltaTime;
         //headRotation += Input.GetMouseButton(1) ? new Vector3(-yMouse, xMouse, 0f) * 3f : Vector3.zero;
         //headRotation += new Vector3(0f, xMouse, 0f) * rotateSpeed;
         headCam.transform.rotation = Quaternion.Euler(headRotation);
         headCam.transform.position = transform.position;
 
-        
+        if (Input.GetMouseButtonDown(0))
+        {
+            Ray shootRay = new Ray(headCam.transform.position, headCam.transform.forward);
+            RaycastHit hitInfo;
+
+            if (Physics.Raycast(shootRay, out hitInfo, 100))
+            {
+                //Debug.Log(hitInfo.transform.name);
+                hitInfo.transform.GetComponent<ChunkGroup>().RegisterHit(hitInfo);
+            }
+        }
+
+        if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            Cursor.lockState = CursorLockMode.None;
+        }
     }
 
     private void FixedUpdate()

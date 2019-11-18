@@ -11,7 +11,7 @@ public static class ChunkCubesMesher
 
     public static Chunk currentChunk;
 
-    public static Mesh Mesh(Chunk chunk)
+    public static Mesh Mesh(Chunk chunk, ChunkGroup chunkGroup)
     {
         currentChunk = chunk;
 
@@ -33,7 +33,15 @@ public static class ChunkCubesMesher
                     int voxelValue = chunk.typeGrid[x, y, z];
                     bool voxelIsMass = voxelValue > 0;
 
-                    Color color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
+                    //Color color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
+                    ushort colorVal = chunk.colorGrid[x, y, z];
+                    ushort mask = 0xf;
+                    int r, g, b, a;
+                    r = (colorVal >> 12) & mask;
+                    g = (colorVal >> 8) & mask;
+                    b = (colorVal >> 4) & mask;
+                    a = (colorVal) & mask;
+                    Color color = new Color(r / 15f, g / 15f, b / 15f, a / 15f);
 
                     Vector3 off = new Vector3(x, y, z);
 
