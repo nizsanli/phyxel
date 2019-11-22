@@ -20,11 +20,10 @@ public class ChunkGroupRectangularPrism : ChunkGroup
         chunks = new Chunk[numChunksXYZ[0], numChunksXYZ[1], numChunksXYZ[2]];
         chunkMeshes = new MeshFilter[numChunksXYZ[0], numChunksXYZ[1], numChunksXYZ[2]];
 
-        /*
         BoxCollider c = gameObject.AddComponent<BoxCollider>();
         c.size = new Vector3(unitsX, unitsY, unitsZ);
         c.center = c.size * .5f;
-        */
+        c.isTrigger = true;
 
         base.Awake();
     }
@@ -57,7 +56,8 @@ public class ChunkGroupRectangularPrism : ChunkGroup
                 {
                     chunk.typeGrid[x, y, z] = 1;
 
-                    chunk.colorGrid[x, y, z] = (ushort)Random.Range(0, ushort.MaxValue);
+                    //chunk.colorGrid[x, y, z] = (ushort)Random.Range(0, ushort.MaxValue);
+                    chunk.colorGrid[x, y, z] = ushort.MaxValue;
                 }
             }
         }

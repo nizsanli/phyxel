@@ -49,15 +49,15 @@ public class PlayerController : MonoBehaviour
         headCam.transform.rotation = Quaternion.Euler(headRotation);
         headCam.transform.position = transform.position;
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButton(0))
         {
-            Ray shootRay = new Ray(headCam.transform.position, headCam.transform.forward);
+            Ray shootRay = new Ray(headCam.transform.position + headCam.transform.forward * transform.GetComponent<CharacterController>().radius, headCam.transform.forward);
             RaycastHit hitInfo;
 
-            if (Physics.Raycast(shootRay, out hitInfo, 100))
+            if (Physics.Raycast(shootRay, out hitInfo, 500))
             {
                 //Debug.Log(hitInfo.transform.name);
-                hitInfo.transform.GetComponent<ChunkGroup>().RegisterHit(hitInfo);
+                hitInfo.transform.GetComponent<ChunkGroup>().RegisterHit(hitInfo, shootRay);
             }
         }
 

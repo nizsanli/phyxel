@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -120,30 +121,53 @@ public abstract class ChunkGroup : MonoBehaviour
         chunkMeshes[chunk.indexX, chunk.indexY, chunk.indexZ] = cMesh;
     }
 
-    public void RegisterHit(RaycastHit hitInfo)
+    public void RegisterHit(RaycastHit hitInfo, Ray shootRay)
     {
-        Vector3 pt = transform.InverseTransformPoint(hitInfo.point) - Vector3.one * .00001f;
+        Vector3 dir = transform.InverseTransformDirection(shootRay.direction);
+        Vector3 loc = transform.InverseTransformPoint(hitInfo.point + shootRay.direction * .0001f);
 
-        Vector3 indexPt = Vector3.Scale(pt, new Vector3(1f / chunkSizeXYZ[0], 1f / chunkSizeXYZ[1], 1f / chunkSizeXYZ[2]));
+        Chunk impactedChunk;
+        MeshFilter cMesh;
 
-        int chunkX, chunkY, chunkZ;
-        chunkX = (int)indexPt.x;
-        chunkY = (int)indexPt.y;
-        chunkZ = (int)indexPt.z;
-        
+        bool foundHit = false;
 
-        Chunk impactedChunk = chunks[chunkX, chunkY, chunkZ];
-        MeshFilter cMesh = chunkMeshes[chunkX, chunkY, chunkZ];
+        do
+        {
+            // chunk index
+            int chunkX, chunkY, chunkZ;
+            chunkX = (int)(loc.x / chunkSizeXYZ[0]);
+            chunkY = (int)(loc.y / chunkSizeXYZ[1]);
+            chunkZ = (int)(loc.z / chunkSizeXYZ[2]);
 
-        int x, y, z;
-        x = (int)pt.x - (chunkX * chunkSizeXYZ[0]);
-        y = (int)pt.y - (chunkY * chunkSizeXYZ[1]);
-        z = (int)pt.z - (chunkZ * chunkSizeXYZ[2]);
+            impactedChunk = chunks[chunkX, chunkY, chunkZ];
+            cMesh = chunkMeshes[chunkX, chunkY, chunkZ];
 
+            // index within chunk
+            int x, y, z;
+            x = (int)(loc.x - (chunkX * chunkSizeXYZ[0]));
+            y = (int)(loc.y - (chunkY * chunkSizeXYZ[1]));
+            z = (int)(loc.z - (chunkZ * chunkSizeXYZ[2]));
 
-        impactedChunk.typeGrid[x, y, z] = 0;
+            if (impactedChunk.typeGrid[x, y, z] > 0)
+            {
+                impactedChunk.typeGrid[x, y, z] = 0;
+
+                foundHit = true;
+            }
+
+            loc += dir * .1f;
+        }
+        while (!foundHit && ContainsPoint(loc));
 
         Mesh mesh = ChunkCubesMesher.Mesh(impactedChunk, this);
         cMesh.mesh = mesh;
+    }
+
+    public bool ContainsPoint(Vector3 pos)
+    {
+        return
+            pos.x >= 0 && pos.x < chunks.GetLength(0) * chunkSizeXYZ[0] &&
+            pos.y >= 0 && pos.y < chunks.GetLength(1) * chunkSizeXYZ[1] &&
+            pos.z >= 0 && pos.z < chunks.GetLength(2) * chunkSizeXYZ[2];
     }
 }
