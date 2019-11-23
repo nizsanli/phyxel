@@ -49,37 +49,31 @@ public static class ChunkCubesMesher
                     Vector3 forward = Vector3.forward;
                     Vector3 right = Vector3.right;
                     Vector3 up = Vector3.up;
-
+                    
                     bool drawLeft =
                         (CoordinateInBounds(x - 1, y, z) && chunk.typeGrid[x - 1, y, z] == 0) ||
-                        (!CoordinateInBounds(x - 1, y, z) && chunk.xMinusChunk != null && chunk.xMinusChunk.typeGrid[(int)chunk.xMinusChunk.SizeX - 1, y, z] == 0) ||
-                        (!CoordinateInBounds(x - 1, y, z) && chunk.xMinusChunk == null);
+                        (!CoordinateInBounds(x - 1, y, z));
 
                     bool drawRight =
                         (CoordinateInBounds(x + 1, y, z) && chunk.typeGrid[x + 1, y, z] == 0) ||
-                        (!CoordinateInBounds(x + 1, y, z) && chunk.xPlusChunk != null && chunk.xPlusChunk.typeGrid[0, y, z] == 0) ||
-                        (!CoordinateInBounds(x + 1, y, z) && chunk.xPlusChunk == null);
+                        (!CoordinateInBounds(x + 1, y, z));
 
                     bool drawBottom =
                         (CoordinateInBounds(x, y - 1, z) && chunk.typeGrid[x, y - 1, z] == 0) ||
-                        (!CoordinateInBounds(x, y - 1, z) && chunk.yMinusChunk != null && chunk.yMinusChunk.typeGrid[x, (int)chunk.yMinusChunk.SizeY - 1, z] == 0) ||
-                        (!CoordinateInBounds(x, y - 1, z) && chunk.yMinusChunk == null);
+                        (!CoordinateInBounds(x, y - 1, z));
 
                     bool drawTop =
                         (CoordinateInBounds(x, y + 1, z) && chunk.typeGrid[x, y + 1, z] == 0) ||
-                        (!CoordinateInBounds(x, y + 1, z) && chunk.yPlusChunk != null && chunk.yPlusChunk.typeGrid[x, 0, z] == 0) ||
-                        (!CoordinateInBounds(x, y + 1, z) && chunk.yPlusChunk == null);
+                        (!CoordinateInBounds(x, y + 1, z));
 
                     bool drawBack =
                         (CoordinateInBounds(x, y, z - 1) && chunk.typeGrid[x, y, z - 1] == 0) ||
-                        (!CoordinateInBounds(x, y, z - 1) && chunk.zMinusChunk != null && chunk.zMinusChunk.typeGrid[x, y, (int)chunk.zMinusChunk.SizeZ - 1] == 0) ||
-                        (!CoordinateInBounds(x, y, z - 1) && chunk.zMinusChunk == null);
+                        (!CoordinateInBounds(x, y, z - 1));
 
                     bool drawFront =
                         (CoordinateInBounds(x, y, z + 1) && chunk.typeGrid[x, y, z + 1] == 0) ||
-                        (!CoordinateInBounds(x, y, z + 1) && chunk.zPlusChunk != null && chunk.zPlusChunk.typeGrid[x, y, 0] == 0) ||
-                        (!CoordinateInBounds(x, y, z + 1) && chunk.zPlusChunk == null);
-
+                        (!CoordinateInBounds(x, y, z + 1));
+                    
 
                     // left
                     if (voxelIsMass && drawLeft)
