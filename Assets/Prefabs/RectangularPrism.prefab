@@ -43,6 +43,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad1027e5f5a8e4a30b20bb228c3d266f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lengthX: 16
-  lengthY: 16
-  lengthZ: 16
+  chunkSizeXYZ: 
+  allocateRate: 0
+  fillRate: 0
+  renderRate: 0
+  chunkMeshPrefab: {fileID: 0}
+  unitsX: 0
+  unitsY: 0
+  unitsZ: 0

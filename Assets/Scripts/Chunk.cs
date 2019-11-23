@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Chunk
 {
-    public static int MAX_VOLUME = 4096;
+    public static int MAX_VOLUME = 512;
 
     public ushort[,,] typeGrid;
 

@@ -121,26 +121,28 @@ public abstract class ChunkGroup : MonoBehaviour
         chunkMeshes[chunk.indexX, chunk.indexY, chunk.indexZ] = cMesh;
     }
 
-    public void RegisterHit(RaycastHit hitInfo, Ray shootRay)
+    public void RegisterHit(RaycastHit hitInfo, Ray shootRay, Gun gun)
     {
         Vector3 dir = transform.InverseTransformDirection(shootRay.direction);
-        Vector3 loc = transform.InverseTransformPoint(hitInfo.point + shootRay.direction * .0001f);
+        //Vector3 loc = transform.InverseTransformPoint(hitInfo.point + shootRay.direction * .00001f);
 
-        Chunk impactedChunk;
-        MeshFilter cMesh;
+        Vector3 loc = transform.InverseTransformDirection((hitInfo.point + shootRay.direction * .01f) - transform.position);
 
-        bool foundHit = false;
+        //Debug.DrawLine(loc, loc + dir * 100f, Color.red, 100f);
+        //Debug.DrawLine(hitInfo.point, hitInfo.point + shootRay.direction * 100f, Color.green, 100f);
 
+        HashSet<Vector3> impactedIndices = new HashSet<Vector3>();
+
+        bool hit = false;
+
+        int chunkX, chunkY, chunkZ;
+        //chunkX = chunkY = chunkZ = -1;
         do
         {
             // chunk index
-            int chunkX, chunkY, chunkZ;
-            chunkX = (int)(loc.x / chunkSizeXYZ[0]);
-            chunkY = (int)(loc.y / chunkSizeXYZ[1]);
-            chunkZ = (int)(loc.z / chunkSizeXYZ[2]);
-
-            impactedChunk = chunks[chunkX, chunkY, chunkZ];
-            cMesh = chunkMeshes[chunkX, chunkY, chunkZ];
+            chunkX = Mathf.FloorToInt(loc.x / chunkSizeXYZ[0]);
+            chunkY = Mathf.FloorToInt(loc.y / chunkSizeXYZ[1]);
+            chunkZ = Mathf.FloorToInt(loc.z / chunkSizeXYZ[2]);
 
             // index within chunk
             int x, y, z;
@@ -148,26 +150,61 @@ public abstract class ChunkGroup : MonoBehaviour
             y = (int)(loc.y - (chunkY * chunkSizeXYZ[1]));
             z = (int)(loc.z - (chunkZ * chunkSizeXYZ[2]));
 
-            if (impactedChunk.typeGrid[x, y, z] > 0)
+            if (ChunkIndexValid(chunkX, chunkY, chunkZ) && chunks[chunkX, chunkY, chunkZ].typeGrid[x, y, z] > 0)
             {
-                impactedChunk.typeGrid[x, y, z] = 0;
+                impactedIndices.Add(new Vector3(chunkX, chunkY, chunkZ));
+                chunks[chunkX, chunkY, chunkZ].typeGrid[x, y, z] = 0;
 
-                foundHit = true;
+                hit = true;
             }
+
+            /*
+            for (int ix = (int)(loc.x - gun.bulletSize * .5f); ix < (loc.x + gun.bulletSize * .5f) + 1; ix++)
+            {
+                for (int iy = (int)(loc.y - gun.bulletSize * .5f); iy < (loc.y + gun.bulletSize * .5f) + 1; iy++)
+                {
+                    for (int iz = (int)(loc.z - gun.bulletSize * .5f); iz < (loc.z + gun.bulletSize * .5f) + 1; iz++) {
+                        // chunk index
+                        chunkX = (int)(loc.x / chunkSizeXYZ[0]);
+                        chunkY = (int)(loc.y / chunkSizeXYZ[1]);
+                        chunkZ = (int)(loc.z / chunkSizeXYZ[2]);
+
+                        // index within chunk
+                        int x, y, z;
+                        x = (int)(loc.x - (chunkX * chunkSizeXYZ[0]));
+                        y = (int)(loc.y - (chunkY * chunkSizeXYZ[1]));
+                        z = (int)(loc.z - (chunkZ * chunkSizeXYZ[2]));
+
+                        if (ChunkIndexValid(chunkX, chunkY, chunkZ))
+                        {
+                            impactedIndices.Add(new Vector3(chunkX, chunkY, chunkZ));
+                            chunks[chunkX, chunkY, chunkZ].typeGrid[x, y, z] = 0;
+                        }
+                    }
+                }
+            }
+            */
 
             loc += dir * .1f;
         }
-        while (!foundHit && ContainsPoint(loc));
+        while (!hit && ChunkIndexValid(chunkX, chunkY, chunkZ));
 
-        Mesh mesh = ChunkCubesMesher.Mesh(impactedChunk, this);
-        cMesh.mesh = mesh;
+        foreach (Vector3 index in impactedIndices)
+        {
+            int x = (int)index.x;
+            int y = (int)index.y;
+            int z = (int)index.z;
+
+            Mesh mesh = ChunkCubesMesher.Mesh(chunks[x, y, z], this);
+            chunkMeshes[x, y, z].mesh = mesh;
+        }
     }
 
-    public bool ContainsPoint(Vector3 pos)
+    public bool ChunkIndexValid(int x, int y, int z)
     {
         return
-            pos.x >= 0 && pos.x < chunks.GetLength(0) * chunkSizeXYZ[0] &&
-            pos.y >= 0 && pos.y < chunks.GetLength(1) * chunkSizeXYZ[1] &&
-            pos.z >= 0 && pos.z < chunks.GetLength(2) * chunkSizeXYZ[2];
+            x >= 0 && x < chunks.GetLength(0) &&
+            y >= 0 && y < chunks.GetLength(1) &&
+            z >= 0 && z < chunks.GetLength(2);
     }
 }
