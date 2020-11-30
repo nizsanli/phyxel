@@ -14,8 +14,8 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = -1;
+        //QualitySettings.vSyncCount = 0;
+        //Application.targetFrameRate = -1;
 
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
