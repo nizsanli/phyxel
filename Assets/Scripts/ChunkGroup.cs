@@ -123,13 +123,15 @@ public abstract class ChunkGroup : MonoBehaviour
 
     public void RegisterHit(RaycastHit hitInfo, Ray shootRay, Gun gun)
     {
+        // get direction of hit in local space
         Vector3 dir = transform.InverseTransformDirection(shootRay.direction);
-        //Vector3 loc = transform.InverseTransformPoint(hitInfo.point + shootRay.direction * .00001f);
 
-        Vector3 loc = transform.InverseTransformDirection((hitInfo.point + shootRay.direction * .01f) - transform.position);
+        // get location of hit in local space
+        // need to nudge it into the chunk to get a valid index
+        Vector3 loc = transform.InverseTransformPoint(hitInfo.point) + dir * .001f;
 
-        //Debug.DrawLine(loc, loc + dir * 100f, Color.red, 100f);
-        //Debug.DrawLine(hitInfo.point, hitInfo.point + shootRay.direction * 100f, Color.green, 100f);
+        // debug shot
+        //Debug.DrawRay(loc, dir * 100f, Color.red, 100f);
 
         HashSet<Vector3> impactedIndices = new HashSet<Vector3>();
 

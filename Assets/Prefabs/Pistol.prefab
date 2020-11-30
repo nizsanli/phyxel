@@ -326,6 +326,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   range: 500
-  fireRate: 1
+  fireRate: 2
   bulletSize: 1
   power: 1
