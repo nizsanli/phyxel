@@ -55,6 +55,7 @@ public class ChunkGroupRectangularPrism : ChunkGroup
                 for (int z = 0; z < resolutionXYZ[2]; z++)
                 {
                     chunk.typeGrid[x, y, z] = 1;
+                    chunk.isoGrid[x, y, z] = 1f;
 
                     //chunk.colorGrid[x, y, z] = (ushort)Random.Range(0, ushort.MaxValue);
                     chunk.colorGrid[x, y, z] = ushort.MaxValue;

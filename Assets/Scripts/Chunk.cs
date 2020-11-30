@@ -7,8 +7,8 @@ public class Chunk
     public static int MAX_VOLUME = 512;
 
     public ushort[,,] typeGrid;
-
     public ushort[,,] colorGrid;
+    public float[,,] isoGrid;
 
     public int indexX, indexY, indexZ;
 
@@ -49,6 +49,7 @@ public class Chunk
     {
         typeGrid = new ushort[lengthX, lengthY, lengthZ];
         colorGrid = new ushort[lengthX, lengthY, lengthZ];
+        isoGrid = new float[lengthX, lengthY, lengthZ];
     }
 
     public static int[] MaxVolumeDimensions(int boundsX, int boundsY, int boundsZ)
