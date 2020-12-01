@@ -731,12 +731,12 @@ PrefabInstance:
     - target: {fileID: 4063862627769069824, guid: 09a28c50565a341bb900701ce917cc84,
         type: 3}
       propertyPath: bulletSize
-      value: 3
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4063862627769069824, guid: 09a28c50565a341bb900701ce917cc84,
         type: 3}
       propertyPath: fireRate
-      value: 5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7701493803525243430, guid: 09a28c50565a341bb900701ce917cc84,
         type: 3}
