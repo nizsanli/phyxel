@@ -29,11 +29,18 @@ public class Gun : MonoBehaviour
         List<RaycastHit> hits = new List<RaycastHit>(Physics.RaycastAll(shootRay, range));
         hits.Sort((x, y) => Vector3.Distance(x.point, orig).CompareTo(Vector3.Distance(y.point, orig)));
 
+        int amtDestroyed = 0;
+        int activeBulletSize = bulletSize;
+
         foreach (RaycastHit hit in hits)
         {
-            if (hit.transform.GetComponent<ChunkGroup>())
+            if (hit.transform.GetComponent<ChunkGroup>() && activeBulletSize > 0)
             {
-                hit.transform.GetComponent<ChunkGroup>().RegisterHit(hit, shootRay, this);
+                int destroyed = hit.transform.GetComponent<ChunkGroup>().RegisterHit(hit, shootRay, activeBulletSize);
+
+                amtDestroyed += destroyed;
+
+                activeBulletSize -= (int)Mathf.Pow(destroyed, 1f / power);
             }
         }
     }

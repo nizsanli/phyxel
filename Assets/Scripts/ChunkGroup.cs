@@ -121,7 +121,7 @@ public abstract class ChunkGroup : MonoBehaviour
         chunkMeshes[chunk.indexX, chunk.indexY, chunk.indexZ] = cMesh;
     }
 
-    public void RegisterHit(RaycastHit hitInfo, Ray shootRay, Gun gun)
+    public int RegisterHit(RaycastHit hitInfo, Ray shootRay, int bulletSize)
     {
         // get direction of hit in local space
         Vector3 dir = transform.InverseTransformDirection(shootRay.direction);
@@ -133,12 +133,9 @@ public abstract class ChunkGroup : MonoBehaviour
         // debug shot
         //Debug.DrawRay(loc, dir * 100f, Color.red, 100f);
 
-        //HashSet<Vector3> impactedIndices = new HashSet<Vector3>();
-
-        //bool hit = false;
-
         int chunkX, chunkY, chunkZ;
         float step = .1f;
+        int amtDestroyed = 0;
         do
         {
             // chunk index
@@ -155,61 +152,14 @@ public abstract class ChunkGroup : MonoBehaviour
 
             if (ChunkIndexValid(chunkX, chunkY, chunkZ) && ChunkVoxelPresent(chunks[chunkX, chunkY, chunkZ], x, y, z))
             {
-                ApplyRadialDamage(chunks[chunkX, chunkY, chunkZ], gun.bulletSize, x, y, z);
+                amtDestroyed += ApplyRadialDamage(chunks[chunkX, chunkY, chunkZ], bulletSize, x, y, z);
             }
-
-            /*
-            if (ChunkIndexValid(chunkX, chunkY, chunkZ) && chunks[chunkX, chunkY, chunkZ].typeGrid[x, y, z] > 0)
-            {
-                impactedIndices.Add(new Vector3(chunkX, chunkY, chunkZ));
-                chunks[chunkX, chunkY, chunkZ].typeGrid[x, y, z] = 0;
-
-                hit = true;
-            }
-            */
-
-            /*
-            for (int ix = (int)(loc.x - gun.bulletSize * .5f); ix < (loc.x + gun.bulletSize * .5f) + 1; ix++)
-            {
-                for (int iy = (int)(loc.y - gun.bulletSize * .5f); iy < (loc.y + gun.bulletSize * .5f) + 1; iy++)
-                {
-                    for (int iz = (int)(loc.z - gun.bulletSize * .5f); iz < (loc.z + gun.bulletSize * .5f) + 1; iz++) {
-                        // chunk index
-                        chunkX = (int)(loc.x / chunkSizeXYZ[0]);
-                        chunkY = (int)(loc.y / chunkSizeXYZ[1]);
-                        chunkZ = (int)(loc.z / chunkSizeXYZ[2]);
-
-                        // index within chunk
-                        int x, y, z;
-                        x = (int)(loc.x - (chunkX * chunkSizeXYZ[0]));
-                        y = (int)(loc.y - (chunkY * chunkSizeXYZ[1]));
-                        z = (int)(loc.z - (chunkZ * chunkSizeXYZ[2]));
-
-                        if (ChunkIndexValid(chunkX, chunkY, chunkZ))
-                        {
-                            impactedIndices.Add(new Vector3(chunkX, chunkY, chunkZ));
-                            chunks[chunkX, chunkY, chunkZ].typeGrid[x, y, z] = 0;
-                        }
-                    }
-                }
-            }
-            */
 
             loc += dir * step;
         }
-        while (false);
+        while (amtDestroyed == 0 && ChunkIndexValid(chunkX, chunkY, chunkZ));
 
-        /*
-        foreach (Vector3 index in impactedIndices)
-        {
-            int x = (int)index.x;
-            int y = (int)index.y;
-            int z = (int)index.z;
-
-            Mesh mesh = ChunkCubesMesher.Mesh(chunks[x, y, z], this);
-            chunkMeshes[x, y, z].mesh = mesh;
-        }
-        */
+        return amtDestroyed;
     }
 
     public bool ChunkIndexValid(int x, int y, int z)
@@ -225,7 +175,7 @@ public abstract class ChunkGroup : MonoBehaviour
         return chunk.typeGrid[x, y, z] > 0;
     }
 
-    public void ApplyRadialDamage(Chunk chunk, int radius, int voxX, int voxY, int voxZ)
+    public int ApplyRadialDamage(Chunk chunk, int radius, int voxX, int voxY, int voxZ)
     {
         // figure out bottom-left-back corner and top-right-forward corner indices
         // iterate triple-nested for-loop all chunks and destroy voxels within radius
@@ -257,14 +207,16 @@ public abstract class ChunkGroup : MonoBehaviour
         int topRightForwardCornerChunkZ = Math.Min(chunk.indexZ + chunksForward, chunks.GetLength(2) - 1);
 
         // debug box corner indices
-        //Vector3 a = new Vector3(botLeftBackCornerChunkX, botLeftBackCornerChunkY, botLeftBackCornerChunkZ);
-        //Vector3 b = new Vector3(topRightForwardCornerChunkX, topRightForwardCornerChunkY, topRightForwardCornerChunkZ);
-        //Debug.Log(a + "  " + b);
+        //Vector3 blb = new Vector3(botLeftBackCornerChunkX, botLeftBackCornerChunkY, botLeftBackCornerChunkZ);
+        //Vector3 trf = new Vector3(topRightForwardCornerChunkX, topRightForwardCornerChunkY, topRightForwardCornerChunkZ);
+        //Debug.Log(blb + "  " + trf);
 
         Vector3 centerVec = new Vector3(
             chunk.indexX * xSize + voxX,
             chunk.indexY * ySize + voxY,
             chunk.indexZ * zSize + voxZ);
+
+        int amtDestroyed = 0;
 
         for (int x = botLeftBackCornerChunkX; x <= topRightForwardCornerChunkX; x++)
         {
@@ -285,9 +237,10 @@ public abstract class ChunkGroup : MonoBehaviour
                                     y * ySize + vy,
                                     z * zSize + vz);
 
-                                if (Vector3.Distance(centerVec, voxVec) <= radius)
+                                if (Vector3.Distance(centerVec, voxVec) <= radius && ChunkVoxelPresent(currChunk, vx, vy, vz))
                                 {
                                     currChunk.typeGrid[vx, vy, vz] = 0;
+                                    amtDestroyed++;
                                 }
                             }
                         }
@@ -298,5 +251,7 @@ public abstract class ChunkGroup : MonoBehaviour
                 }
             }
         }
+
+        return amtDestroyed;
     }
 }
